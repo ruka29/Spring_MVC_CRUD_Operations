@@ -42,6 +42,12 @@
     </div>
   </div>
 
+  <c:if test="${not empty message}">
+    <div class="fixed bottom-5 right-5 z-[1000] rounded-lg px-7 py-[10px] bg-white/20 backdrop-blur-md border-1 border-[#16A34A] shadow-md" id="notificationContainer">
+      <div class="text-[#16A34A] font-semibold" id="notificationMessage">${message}</div>
+    </div>
+  </c:if>
+
   <script>
     const error = "<c:out value='${error}' />";
     if (error) {
@@ -52,6 +58,13 @@
       const errorMessage = document.getElementById('errorMessage');
       errorMessage.innerHTML = message;
     }
+
+    setTimeout(() => {
+      const notification = document.getElementById("notificationContainer");
+      if (notification) {
+        notification.style.display = "none";
+      }
+    }, 5000);
   </script>
   </body>
 </html>

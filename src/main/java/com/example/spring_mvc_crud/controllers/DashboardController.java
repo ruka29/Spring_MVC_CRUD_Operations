@@ -2,8 +2,6 @@ package com.example.spring_mvc_crud.controllers;
 
 import com.example.spring_mvc_crud.models.User;
 import com.example.spring_mvc_crud.services.UserServices;
-import com.example.spring_mvc_crud.utils.JWTUtil;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,64 +20,27 @@ public class DashboardController {
         this.userServices = userServices;
     }
 
-    @RequestMapping("/admin-dashboard")
-    public String adminDashboard(HttpServletRequest request, HttpServletResponse response, Model model) {
-        String token = null;
-        String userEmail;
-        Cookie[] cookies = request.getCookies();
-
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("jwt_token")) {
-                token = cookie.getValue();
-                break;
-            }
-        }
-
-        if (token != null) {
-            userEmail = JWTUtil.validateToken(token);
-            User user = userServices.getUserByEmail(userEmail);
-
-            List<User> allUsers = userServices.getAllUsers();
-            model.addAttribute("allUsers", allUsers);
-            model.addAttribute("user", user);
-
-            response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-            response.setHeader("Pragma", "no-cache");
-            response.setDateHeader("Expires", 0);
-
-            return "dashboard";
-        } else {
-            return "redirect:/educenter.com/auth/login";
-        }
-    }
-
     @RequestMapping("/dashboard")
-    public String userDashboard(HttpServletRequest request, HttpServletResponse response, Model model) {
-        String token = null;
-        String userEmail;
-        Cookie[] cookies = request.getCookies();
+    public String adminDashboard(HttpServletRequest request, HttpServletResponse response, Model model) {
+        String userEmail = (String) request.getAttribute("user");
 
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("jwt_token")) {
-                token = cookie.getValue();
-                break;
-            }
-        }
-
-        if (token != null) {
-            userEmail = JWTUtil.validateToken(token);
+        try {
             User user = userServices.getUserByEmail(userEmail);
 
-            model.addAttribute("user", user);
+            if (user.getRole().equals("admin")) {
+                List<User> allUsers = userServices.getAllUsers();
+                model.addAttribute("allUsers", allUsers);
+                model.addAttribute("user", user);
 
-            response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-            response.setHeader("Pragma", "no-cache");
-            response.setDateHeader("Expires", 0);
+                return "dashboard";
+            } else {
+                model.addAttribute("user", user);
 
-            return "user-dashboard";
-        } else {
-            return "redirect:/educenter.com/auth/login";
+                return "user-dashboard";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "server-error";
         }
     }
-
 }

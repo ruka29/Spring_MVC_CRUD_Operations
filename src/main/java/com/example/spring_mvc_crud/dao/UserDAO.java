@@ -1,7 +1,6 @@
 package com.example.spring_mvc_crud.dao;
 
 import com.example.spring_mvc_crud.models.User;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -75,6 +74,21 @@ public class UserDAO {
                     user.getMobile(),
                     user.getPassword(),
                     user.getId()
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    public int changePassword(User user) {
+        String query = "UPDATE users SET password = ? WHERE email = ?";
+
+        try {
+            return userTemplate.update(
+                    query,
+                    user.getPassword(),
+                    user.getEmail()
             );
         } catch (Exception e) {
             e.printStackTrace();

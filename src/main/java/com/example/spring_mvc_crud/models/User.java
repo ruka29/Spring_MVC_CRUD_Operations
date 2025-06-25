@@ -1,6 +1,13 @@
 package com.example.spring_mvc_crud.models;
 
+import jakarta.persistence.*;
+
+//@Entity
+//@Table(name = "users")
 public class User {
+
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
     private String email;
@@ -8,16 +15,6 @@ public class User {
     private String password;
     private String role;
     private String image;
-
-//    public User(int id, String name, String email, String mobile, String password, String role, String image) {
-//        this.id = id;
-//        this.name = name;
-//        this.email = email;
-//        this.mobile = mobile;
-//        this.password = password;
-//        this.role = role;
-//        this.image = image;
-//    }
 
     public User() {    }
 

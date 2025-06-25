@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/auth")
@@ -42,6 +43,33 @@ public class AuthController {
         return "redirect:/educenter.com/auth/login";
     }
 
+    @GetMapping("/change-password")
+    public String showChangePassword(
+            @RequestParam("token") String token,
+            Model model
+    ) {
+        String email = JWTUtil.validateToken(token);
+        model.addAttribute("email", email);
+        return "change-password";
+    }
+
+    @PostMapping("/change-password")
+    public String changePassword(
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            RedirectAttributes redirectAttributes
+    ) {
+        try {
+            String message = userServices.changePassword(email, password);
+            redirectAttributes.addFlashAttribute("message", message);
+
+            return "redirect:/educenter.com/auth/login";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "server-error";
+        }
+    }
+
     @PostMapping("/register")
     public String userRegister(
             @RequestParam("name") String name,
@@ -50,13 +78,18 @@ public class AuthController {
             @RequestParam("password") String password,
             Model model
     ) {
-        String message = userServices.registerUser(name, email, mobile, password);
-        model.addAttribute("message", message);
+        try {
+            String message = userServices.registerUser(name, email, mobile, password);
+            model.addAttribute("message", message);
 
-        if (message.equals("Registration successful!")) {
-            return "redirect:/educenter.com/auth/login";
-        } else {
-            return "register";
+            if (message.equals("Registration successful!")) {
+                return "redirect:/educenter.com/auth/login";
+            } else {
+                return "register";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "server-error";
         }
     }
 
@@ -67,32 +100,26 @@ public class AuthController {
             HttpServletResponse response,
             Model model
     ) {
-        String userRole = userServices.login(email, password);
+        try {
+            boolean isValid = userServices.login(email, password);
 
-        if (userRole == null) {
-            model.addAttribute("error", "Invalid Email or Password!");
-            return "login";
-        } else if (userRole.equals("admin")) {
-            String token = JWTUtil.generateToken(email);
+            if (isValid) {
+                String token = JWTUtil.generateToken(email);
 
-            Cookie cookie = new Cookie("jwt_token", token);
-            cookie.setHttpOnly(true);
-            cookie.setPath("/");
-            cookie.setMaxAge(3600);
-            response.addCookie(cookie);
+                Cookie cookie = new Cookie("jwt_token", token);
+                cookie.setHttpOnly(true);
+                cookie.setPath("/");
+                cookie.setMaxAge(3600);
+                response.addCookie(cookie);
 
-            return "redirect:/educenter.com/admin-dashboard";
-        } else {
-            String token = JWTUtil.generateToken(email);
-
-            Cookie cookie = new Cookie("jwt_token", token);
-            cookie.setHttpOnly(true);
-            cookie.setPath("/");
-            cookie.setMaxAge(3600);
-            response.addCookie(cookie);
-
-
-            return "redirect:/educenter.com/dashboard";
+                return "redirect:/educenter.com/dashboard";
+            } else {
+                model.addAttribute("error", "Invalid Email or Password!");
+                return "login";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "server-error";
         }
     }
 }

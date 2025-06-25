@@ -31,15 +31,20 @@ public class UserController {
             @RequestParam("role") String role,
             RedirectAttributes redirectAttributes
     ) {
-        String message = userServices.addUser(name, email, mobile, password, role);
+        try {
+            String message = userServices.addUser(name, email, mobile, password, role);
 
-        if (message.equals("Registration successful!")) {
-            redirectAttributes.addFlashAttribute("message", message);
-        } else {
-            redirectAttributes.addFlashAttribute("error", message);
+            if (message.equals("Registration successful!")) {
+                redirectAttributes.addFlashAttribute("message", message);
+            } else {
+                redirectAttributes.addFlashAttribute("error", message);
+            }
+
+            return "redirect:/educenter.com/dashboard";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "server-error";
         }
-
-        return "redirect:/educenter.com/admin-dashboard";
     }
 
     @PostMapping("/update")
@@ -57,15 +62,27 @@ public class UserController {
             password = "user123";
         }
 
-        String message = userServices.updateUser(parseInt(id), name, email, mobile, password);
+        try {
+            String message = userServices.updateUser(parseInt(id), name, email, mobile, password);
 
-        if (message.equals("User Updated Successfully!")) {
-            redirectAttributes.addFlashAttribute("message", message);
-        } else {
-            redirectAttributes.addFlashAttribute("error", message);
+            if (password != null && message.equals("User Updated Successfully!")) {
+                redirectAttributes.addAttribute("message", message);
+                redirectAttributes.addAttribute("receiverEmail", email);
+
+                return "redirect:/educenter.com/email/send";
+            }
+
+            if (message.equals("User Updated Successfully!")) {
+                redirectAttributes.addFlashAttribute("message", message);
+            } else {
+                redirectAttributes.addFlashAttribute("error", message);
+            }
+
+            return "redirect:/educenter.com/dashboard";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "server-error";
         }
-
-        return "redirect:/educenter.com/admin-dashboard";
     }
 
     @PostMapping("/save")
@@ -77,15 +94,21 @@ public class UserController {
             @RequestParam(value = "password", required = false) String password,
             RedirectAttributes redirectAttributes
     ) {
-        String message = userServices.updateUser(parseInt(id), name, email, mobile, password);
 
-        if (message.equals("User Updated Successfully!")) {
-            redirectAttributes.addFlashAttribute("message", message);
-        } else {
-            redirectAttributes.addFlashAttribute("error", message);
+        try {
+            String message = userServices.updateUser(parseInt(id), name, email, mobile, password);
+
+            if (message.equals("User Updated Successfully!")) {
+                redirectAttributes.addFlashAttribute("message", message);
+            } else {
+                redirectAttributes.addFlashAttribute("error", message);
+            }
+
+            return "redirect:/educenter.com/dashboard";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "server-error";
         }
-
-        return "redirect:/educenter.com/dashboard";
     }
 
     @PostMapping("/delete")
@@ -93,13 +116,20 @@ public class UserController {
             @RequestParam("id") int id,
             RedirectAttributes redirectAttributes
     ) {
-        int result = userServices.deleteUser(id);
-        if (result > 0) {
-            redirectAttributes.addFlashAttribute("message", "User deleted successfully!");
-        } else {
-            redirectAttributes.addFlashAttribute("error", "Oops..! Something went wrong!");
+
+        try {
+            int result = userServices.deleteUser(id);
+//            boolean isDeleted = userServices.deleteUser(id);
+            if (result > 0) {
+                redirectAttributes.addFlashAttribute("message", "User deleted successfully!");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Oops..! Something went wrong!");
+            }
+            return "redirect:/educenter.com/dashboard";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "server-error";
         }
-//        redirectAttributes.addFlashAttribute("location", location);
-        return "redirect:/educenter.com/admin-dashboard";
+
     }
 }

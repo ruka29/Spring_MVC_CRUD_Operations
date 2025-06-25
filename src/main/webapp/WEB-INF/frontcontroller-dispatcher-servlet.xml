@@ -14,4 +14,6 @@
     </bean>
 
     <import resource="spring-db-servlet.xml"/>
+<!--    <import resource="jpa-spring-db-servlet.xml"/>-->
+    <import resource="spring-mail-config.xml" />
 </beans>
